@@ -24,6 +24,7 @@ module.exports = {
     'webpack.config.js',
   ],
   rules: {
+    'arrow-body-style': 'off',
     'import/prefer-default-export': 'off',
     'max-len': ['error', {
       code: 120,
