@@ -5,6 +5,7 @@ import {
 } from '@chakra-ui/react';
 
 import IndexPage from '@/pages';
+import LogPage from '@/pages/log';
 
 import { RoutePath } from './routes';
 
@@ -12,6 +13,7 @@ const Main: React.FC = () => {
   return (
     <Switch>
       <Route exact path={RoutePath.home} component={IndexPage} />
+      <Route path={RoutePath.log} component={LogPage} />
     </Switch>
   );
 };
