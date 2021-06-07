@@ -1,5 +1,8 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
+import {
+  Container,
+} from '@chakra-ui/react';
 
 import IndexPage from '@/pages';
 
@@ -15,7 +18,9 @@ const Main: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <Main />
+    <Container centerContent maxW="lg" mt={2}>
+      <Main />
+    </Container>
   );
 };
 
