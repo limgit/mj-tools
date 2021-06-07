@@ -26,7 +26,7 @@ const Log: React.FC = () => {
   React.useEffect(() => {
     // Initial loading of storage data
     const pList = getItem<string[]>(PLAYER_LIST_KEY);
-    setPlayerList(pList ?? []);
+    _setPlayerList(pList ?? []);
   }, []);
 
   const onAddPlayer = () => {
@@ -44,7 +44,7 @@ const Log: React.FC = () => {
 
   return (
     <VStack>
-      <Heading size="sm">플레이어 목록</Heading>
+      <Heading size="md">플레이어 목록</Heading>
       {playerList.length === 0 ? (
         <Text>없음</Text>
       ) : (
