@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/naming-convention */
 import React from 'react';
 import {
   VStack,
@@ -13,8 +15,13 @@ import { getItem, setItem } from '@/storage';
 const PLAYER_LIST_KEY = 'playerList';
 
 const Log: React.FC = () => {
-  const [playerList, setPlayerList] = React.useState<string[]>([]);
+  const [playerList, _setPlayerList] = React.useState<string[]>([]);
   const [playerInput, setPlayerInput] = React.useState('');
+
+  const setPlayerList = (newV: string[]) => {
+    _setPlayerList(newV);
+    setItem(PLAYER_LIST_KEY, newV);
+  };
 
   React.useEffect(() => {
     // Initial loading of storage data
@@ -24,21 +31,29 @@ const Log: React.FC = () => {
 
   const onAddPlayer = () => {
     if (playerInput !== '') {
-      const newPlayerList = [...playerList, playerInput];
-      setPlayerList(newPlayerList);
-      setItem(PLAYER_LIST_KEY, newPlayerList);
+      setPlayerList([...playerList, playerInput]);
       setPlayerInput('');
     }
   };
   const onResetPlayer = () => {
     setPlayerList([]);
-    setItem(PLAYER_LIST_KEY, []);
+  };
+  const onDeletePlayer = (name: string) => {
+    setPlayerList(playerList.filter((e) => e !== name));
   };
 
   return (
     <VStack>
       <Heading size="sm">플레이어 목록</Heading>
-      {playerList.length === 0 ? <Text>없음</Text> : <Text>{playerList.join(', ')}</Text>}
+      {playerList.length === 0 ? (
+        <Text>없음</Text>
+      ) : (
+        <HStack>
+          {playerList.map((e) => (
+            <Text onClick={() => onDeletePlayer(e)}>{e}</Text>
+          ))}
+        </HStack>
+      )}
       <Input value={playerInput} onChange={(e) => setPlayerInput(e.target.value)} />
       <HStack>
         <Button onClick={onAddPlayer}>추가</Button>
