@@ -73,6 +73,14 @@ const Log: React.FC = () => {
     ]);
   };
   const setGame = (gameId: number, newV: Game) => setGameList(gameList.map((game) => (game.id !== gameId ? game : newV)));
+  const endGame = (gameId: number) => {
+    const targetGame = gameList.find((game) => game.id === gameId);
+    if (targetGame === undefined) return;
+    setGame(gameId, {
+      ...targetGame,
+      rounds: targetGame.rounds.slice(0, -1), // Remove ongoing round
+    });
+  };
   const setRound = (gameId: number, roundIdx: number, newV: Round) => {
     const targetGame = gameList.find((game) => game.id === gameId);
     if (targetGame === undefined) return;
@@ -272,6 +280,7 @@ const Log: React.FC = () => {
                 <HStack>
                   <Button onClick={() => setAgariModal({ open: true, game })}>화료</Button>
                   <Button onClick={() => setYuugyokuModal({ open: true, game })}>유국</Button>
+                  <Button onClick={() => endGame(game.id)}>종료</Button>
                 </HStack>
               </>
             )}
