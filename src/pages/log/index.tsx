@@ -25,6 +25,7 @@ import {
 import { GameMode, Game, Round, RoundEnding } from './types';
 
 import NewGameModal from './NewGameModal';
+import AgariModal from './AgariModal';
 import YuugyokuModal from './YuugyokuModal';
 
 const GAME_LIST_KEY = 'gameList';
@@ -33,6 +34,10 @@ const Log: React.FC = () => {
   const { isOpen: modalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
   const [gameList, _setGameList] = React.useState<Game[]>([]);
   const [yuugyokuModal, setYuugyokuModal] = React.useState<{ open: boolean, game: Game | null }>({
+    open: false,
+    game: null,
+  });
+  const [agariModal, setAgariModal] = React.useState<{ open: boolean, game: Game | null }>({
     open: false,
     game: null,
   });
@@ -125,6 +130,12 @@ const Log: React.FC = () => {
     });
   };
 
+  const onAgariModalClose = () => setAgariModal({ open: false, game: null });
+  const onAgariModalSave = (ending: RoundEnding) => {
+    const { game } = agariModal;
+    if (game === null) return;
+    endCurrentRound(game.id, ending);
+  };
   const onYuugyokuModalClose = () => setYuugyokuModal({ open: false, game: null });
   const onYuugyokuModalSave = (tenpaiList: string[], note: string) => {
     const { game } = yuugyokuModal;
@@ -137,7 +148,7 @@ const Log: React.FC = () => {
   }
 
   return (
-    <VStack spacing={8}>
+    <VStack spacing={8} mb={8}>
       {gameList.map((game) => {
         const { eswn } = game;
         const { scoreLog, deposit } = gameToScoreLog(game);
@@ -197,8 +208,8 @@ const Log: React.FC = () => {
                       return `${point.fu}부 ${point.fan}판`;
                     })();
                     const ronScore = (() => {
-                      if (point.type === 'yakuman') return (isOya ? 48000 : 36000) * point.multiplier;
-                      return fufanToRonScore(game.mode, point.fu, point.fan, isOya);
+                      if (point.type === 'yakuman') return (isOya ? 48000 : 36000) * point.multiplier + round.honba * 300;
+                      return fufanToRonScore(game.mode, point.fu, point.fan, isOya) + round.honba * 300;
                     })();
                     return (
                       <Text>
@@ -219,12 +230,12 @@ const Log: React.FC = () => {
                     })();
                     const tsumoScore = (() => {
                       if (isOya) {
-                        if (point.type === 'yakuman') return `${16000 * point.multiplier}∀`;
-                        return `${fufanToTsumoScoreOya(game.mode, point.fu, point.fan)}∀`;
+                        if (point.type === 'yakuman') return `${16000 * point.multiplier + round.honba * 100}∀`;
+                        return `${fufanToTsumoScoreOya(game.mode, point.fu, point.fan) + round.honba * 100}∀`;
                       }
-                      if (point.type === 'yakuman') return `${8000 * point.multiplier}-${16000 * point.multiplier}`;
+                      if (point.type === 'yakuman') return `${8000 * point.multiplier + round.honba * 100}-${16000 * point.multiplier + round.honba * 100}`;
                       const { oya, kodomo } = fufanToTsumoScoreKodomo(game.mode, point.fu, point.fan);
-                      return `${kodomo}-${oya}`;
+                      return `${kodomo + round.honba * 100}-${oya + round.honba * 100}`;
                     })();
                     return (
                       <Text>
@@ -251,7 +262,7 @@ const Log: React.FC = () => {
               })}
             </Grid>
             <HStack>
-              <Button>화료</Button>
+              <Button onClick={() => setAgariModal({ open: true, game })}>화료</Button>
               <Button onClick={() => setYuugyokuModal({ open: true, game })}>유국</Button>
             </HStack>
           </VStack>
@@ -263,6 +274,12 @@ const Log: React.FC = () => {
         open={modalOpen}
         onClose={onModalClose}
         onAddGame={addGame}
+      />
+      <AgariModal
+        open={agariModal.open}
+        game={agariModal.game}
+        onClose={onAgariModalClose}
+        onSave={onAgariModalSave}
       />
       <YuugyokuModal
         open={yuugyokuModal.open}

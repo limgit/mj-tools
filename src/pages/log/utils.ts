@@ -104,8 +104,8 @@ export function gameToScoreLog(game: Game) {
         if (point.type === 'normal') return fufanToRonScore(game.mode, point.fu, point.fan, isOya);
         return (isOya ? 48000 : 36000) * point.multiplier;
       })();
-      thisRoundLog[targetIdx] -= movingScore + round.kyoku * 300;
-      thisRoundLog[playerIdx] += (movingScore + deposit + round.kyoku * 300);
+      thisRoundLog[targetIdx] -= movingScore + round.honba * 300;
+      thisRoundLog[playerIdx] += (movingScore + deposit + round.honba * 300);
       deposit = 0;
     } else if (ending?.type === 'tsumo') {
       // tsumo
@@ -118,8 +118,8 @@ export function gameToScoreLog(game: Game) {
           return 16000 * point.multiplier;
         })();
         thisRoundLog = thisRoundLog.map((e, idx) => {
-          if (idx === playerIdx) return e + perPlayerScore * 3 + deposit + round.kyoku * 300;
-          return e - (perPlayerScore + round.kyoku * 100);
+          if (idx === playerIdx) return e + perPlayerScore * 3 + deposit + round.honba * 300;
+          return e - (perPlayerScore + round.honba * 100);
         });
         deposit = 0;
       } else {
@@ -128,9 +128,9 @@ export function gameToScoreLog(game: Game) {
           return { oya: 16000 * point.multiplier, kodomo: 8000 * point.multiplier };
         })();
         thisRoundLog = thisRoundLog.map((e, idx) => {
-          if (idx === round.kyoku % 4) return e - (perPlayerScore.oya + round.kyoku * 100);
-          if (idx === playerIdx) return e + perPlayerScore.oya + perPlayerScore.kodomo * 2 + deposit + round.kyoku * 300;
-          return e - (perPlayerScore.kodomo + round.kyoku * 100);
+          if (idx === round.kyoku % 4) return e - (perPlayerScore.oya + round.honba * 100);
+          if (idx === playerIdx) return e + perPlayerScore.oya + perPlayerScore.kodomo * 2 + deposit + round.honba * 300;
+          return e - (perPlayerScore.kodomo + round.honba * 100);
         });
         deposit = 0;
       }
