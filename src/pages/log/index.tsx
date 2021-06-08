@@ -16,52 +16,11 @@ import {
 } from '@chakra-ui/react';
 
 import { getItem, setItem } from '@/storage';
+import { GameMode, Game } from './types';
 
 import NewGameModal from './NewGameModal';
 
 const GAME_LIST_KEY = 'gameList';
-
-type GameMode = 'fan' | 'fufan';
-type Game = {
-  id: number,
-  mode: GameMode,
-  eswn: [string, string, string, string],
-  rounds: {
-    kyoku: number,
-    honba: number,
-    riichi: string[],
-    ending: {
-      type: 'yuugyoku',
-      tenpai: string[],
-      note: string,
-    } | {
-      type: 'ron',
-      player: string,
-      target: string,
-      point: {
-        type: 'yakuman',
-        multiplier: number,
-      } | {
-        type: 'normal',
-        fan: number,
-        fu: number, // Ignored in fan mode
-      },
-      note: string,
-    } | {
-      type: 'tsumo',
-      player: string,
-      point: {
-        type: 'yakuman',
-        multiplier: number,
-      } | {
-        type: 'normal',
-        fan: number,
-        fu: number, // Ignored in fan mode
-      },
-      note: string,
-    } | undefined, // round still going
-  }[],
-};
 
 function fufanToRonScore(mode: GameMode, fu: number, fan: number, isOya: boolean) {
   if (fan <= 0) return 0;

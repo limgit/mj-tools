@@ -13,10 +13,12 @@ import {
   Button,
 } from '@chakra-ui/react';
 
+import { GameMode } from './types';
+
 type NewGameModalProps = {
   open: boolean,
   onClose: () => void,
-  onAddGame: (mode: 'fufan' | 'fan', eswn: [string, string, string, string]) => void,
+  onAddGame: (mode: GameMode, eswn: [string, string, string, string]) => void,
 };
 
 const NewGameModal: React.FC<NewGameModalProps> = ({
@@ -27,7 +29,7 @@ const NewGameModal: React.FC<NewGameModalProps> = ({
   const setModalInputsIdx = (newV: string, idx: number) => {
     setModalInputs(modalInputs.map((e, i) => (i === idx ? newV : e)));
   };
-  const onCreate = (mode: 'fufan' | 'fan') => {
+  const onCreate = (mode: GameMode) => {
     onAddGame(mode, modalInputs as [string, string, string, string]);
     setModalInputs(DEFAULT);
     onClose();
