@@ -246,25 +246,29 @@ const Log: React.FC = () => {
                 </HStack>
               )
             })}
-            <Grid templateColumns="repeat(2, 1fr)" gap={2}>
-              {eswn.map((name) => {
-                const isRiiched = lastRound.riichi.includes(name);
-                return (
-                  <GridItem key={name}>
-                    <Button
-                      colorScheme={isRiiched ? 'telegram' : undefined}
-                      onClick={() => toggleRiichi(game.id, game.rounds.length - 1, name)}
-                    >
-                      {name} 리치
-                    </Button>
-                  </GridItem>
-                );
-              })}
-            </Grid>
-            <HStack>
-              <Button onClick={() => setAgariModal({ open: true, game })}>화료</Button>
-              <Button onClick={() => setYuugyokuModal({ open: true, game })}>유국</Button>
-            </HStack>
+            {lastRound.ending === undefined && (
+              <>
+                <Grid templateColumns="repeat(2, 1fr)" gap={2}>
+                  {eswn.map((name) => {
+                    const isRiiched = lastRound.riichi.includes(name);
+                    return (
+                      <GridItem key={name}>
+                        <Button
+                          colorScheme={isRiiched ? 'telegram' : undefined}
+                          onClick={() => toggleRiichi(game.id, game.rounds.length - 1, name)}
+                        >
+                          {name} 리치
+                        </Button>
+                      </GridItem>
+                    );
+                  })}
+                </Grid>
+                <HStack>
+                  <Button onClick={() => setAgariModal({ open: true, game })}>화료</Button>
+                  <Button onClick={() => setYuugyokuModal({ open: true, game })}>유국</Button>
+                </HStack>
+              </>
+            )}
           </VStack>
         );
       })}
