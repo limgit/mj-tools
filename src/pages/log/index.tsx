@@ -1,5 +1,6 @@
 // TODO: Rewrite this code. This code is for fast MVP
 
+/* eslint-disable max-len */
 /* eslint-disable react/jsx-one-expression-per-line */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -22,7 +23,9 @@ import {
   fufanToTsumoScoreOya,
   gameToScoreLog,
 } from './utils';
-import { GameMode, Game, Round, RoundEnding } from './types';
+import {
+  GameMode, Game, Round, RoundEnding,
+} from './types';
 
 import NewGameModal from './NewGameModal';
 import AgariModal from './AgariModal';
@@ -33,11 +36,11 @@ const GAME_LIST_KEY = 'gameList';
 const Log: React.FC = () => {
   const { isOpen: modalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
   const [gameList, _setGameList] = React.useState<Game[]>([]);
-  const [yuugyokuModal, setYuugyokuModal] = React.useState<{ open: boolean, game: Game | null }>({
+  const [yuugyokuModal, setYuugyokuModal] = React.useState<{ open: boolean, game: Game | null, }>({
     open: false,
     game: null,
   });
-  const [agariModal, setAgariModal] = React.useState<{ open: boolean, game: Game | null }>({
+  const [agariModal, setAgariModal] = React.useState<{ open: boolean, game: Game | null, }>({
     open: false,
     game: null,
   });
@@ -88,7 +91,7 @@ const Log: React.FC = () => {
       ...targetRound,
       riichi: prevRiichi.includes(name) ? prevRiichi.filter((x) => x !== name) : [...prevRiichi, name],
     });
-  }
+  };
   const endCurrentRound = (gameId: number, endingV: RoundEnding) => {
     const targetGame = gameList.find((game) => game.id === gameId);
     if (targetGame === undefined) return;
@@ -98,8 +101,8 @@ const Log: React.FC = () => {
       const oyaPlayer = targetGame.eswn[kyoku % 4]!;
       // oya's agari / yuugyoku, oya is ten -> kyoku persists, honba increases
       if ((endingV.type === 'ron' && endingV.payees.filter((e) => e.name === oyaPlayer).length === 1)
-        ||(endingV.type ==='tsumo' && endingV.player === oyaPlayer)
-        ||(endingV.type === 'yuugyoku' && endingV.tenpai.includes(oyaPlayer))
+        || (endingV.type === 'tsumo' && endingV.player === oyaPlayer)
+        || (endingV.type === 'yuugyoku' && endingV.tenpai.includes(oyaPlayer))
       ) {
         return { kyoku, honba: honba + 1 };
       }
@@ -126,7 +129,7 @@ const Log: React.FC = () => {
           riichi: [],
           ending: undefined,
         },
-      ]
+      ],
     });
   };
 
@@ -145,7 +148,7 @@ const Log: React.FC = () => {
       tenpai: tenpaiList,
       note,
     });
-  }
+  };
 
   return (
     <VStack spacing={8} mb={8}>
@@ -182,11 +185,11 @@ const Log: React.FC = () => {
             {game.rounds.map((round) => {
               const roundPrefix = {
                 0: '동', 1: '남', 2: '서', 3: '북',
-              }[Math.floor(round.kyoku / 4)];
+              }[Math.floor(round.kyoku / 4)]!;
               const { ending } = round;
               return (
                 <HStack key={`${round.kyoku}-${round.honba}`}>
-                  <Text fontWeight="bold">{`${roundPrefix} ${round.kyoku % 4 + 1}국 ${round.honba}본장`}</Text>
+                  <Text fontWeight="bold">{`${roundPrefix} ${(round.kyoku % 4) + 1}국 ${round.honba}본장`}</Text>
                   {ending === undefined && (<Text>진행 중</Text>)}
                   {ending?.type === 'yuugyoku' && (
                     <Text>
@@ -244,10 +247,10 @@ const Log: React.FC = () => {
                       <Text>
                         쯔모: {player} ({pointTxt}, {tsumoScore}) {note}
                       </Text>
-                    )
+                    );
                   })()}
                 </HStack>
-              )
+              );
             })}
             {lastRound.ending === undefined && (
               <>
