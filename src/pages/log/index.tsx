@@ -137,6 +137,76 @@ function fufanToTsumoScoreKodomo(mode: GameMode, fu: number, fan: number) {
   // TODO: fufan
   return { oya: 0, kodomo: 0 };
 }
+function gameToScoreLog(game: Game) {
+  const { eswn } = game;
+  const scoreLog: number[][] = [];
+  let deposit = 0;
+  game.rounds.forEach((round) => {
+    let thisRoundLog = [0, 0, 0, 0];
+    // Handling riichi
+    eswn.forEach((name, idx) => {
+      if (round.riichi.includes(name)) {
+        thisRoundLog[idx] -= 1000; deposit += 1000;
+      }
+    });
+    // Handling round end
+    const { ending } = round;
+    if (ending?.type === 'yuugyoku') {
+      const { tenpai } = ending;
+      const notenCount = 4 - tenpai.length;
+      if (notenCount !== 0 && notenCount !== 4) {
+        const tenpaiRyo = 3000 / notenCount;
+        eswn.forEach((name, idx) => {
+          thisRoundLog[idx] += (tenpai.includes(name) ? 3000 / (4 - notenCount) : -tenpaiRyo);
+        });
+      }
+    } else if (ending?.type === 'ron') {
+      const { point } = ending;
+      const playerIdx = eswn.indexOf(ending.player);
+      const targetIdx = eswn.indexOf(ending.target);
+      const isOya = playerIdx === round.kyoku % 4;
+      const movingScore = (() => {
+        if (point.type === 'normal') return fufanToRonScore(game.mode, point.fu, point.fan, isOya);
+        return (isOya ? 48000 : 36000) * point.multiplier;
+      })();
+      thisRoundLog[targetIdx] -= movingScore + round.kyoku * 300;
+      thisRoundLog[playerIdx] += (movingScore + deposit + round.kyoku * 300);
+      deposit = 0;
+    } else if (ending?.type === 'tsumo') {
+      // tsumo
+      const { point } = ending;
+      const playerIdx = eswn.indexOf(ending.player);
+      const isOya = playerIdx === round.kyoku % 4;
+      if (isOya) {
+        const perPlayerScore = (() => {
+          if (point.type === 'normal') return fufanToTsumoScoreOya(game.mode, point.fu, point.fan);
+          return 16000 * point.multiplier;
+        })();
+        thisRoundLog = thisRoundLog.map((e, idx) => {
+          if (idx === playerIdx) return e + perPlayerScore * 3 + deposit + round.kyoku * 300;
+          return e - (perPlayerScore + round.kyoku * 100);
+        });
+        deposit = 0;
+      } else {
+        const perPlayerScore = (() => {
+          if (point.type === 'normal') return fufanToTsumoScoreKodomo(game.mode, point.fu, point.fan);
+          return { oya: 16000 * point.multiplier, kodomo: 8000 * point.multiplier };
+        })();
+        thisRoundLog = thisRoundLog.map((e, idx) => {
+          if (idx === round.kyoku % 4) return e - (perPlayerScore.oya + round.kyoku * 100);
+          if (idx === playerIdx) return e + perPlayerScore.oya + perPlayerScore.kodomo * 2 + deposit + round.kyoku * 300;
+          return e - (perPlayerScore.kodomo + round.kyoku * 100);
+        });
+        deposit = 0;
+      }
+    }
+    scoreLog.push(thisRoundLog);
+  });
+  return {
+    scoreLog,
+    deposit,
+  };
+}
 
 const Log: React.FC = () => {
   const { isOpen: modalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
@@ -175,68 +245,9 @@ const Log: React.FC = () => {
     <VStack>
       {gameList.map((game) => {
         const { eswn } = game;
-        let score = [25000, 25000, 25000, 25000];
-        let deposit = 0;
-        // Calculating scores
-        game.rounds.forEach((round) => {
-          // Handling riichi
-          eswn.forEach((name, idx) => {
-            if (round.riichi.includes(name)) {
-              score[idx] -= 1000; deposit += 1000;
-            }
-          });
-          // Handling round end
-          const { ending } = round;
-          if (ending === undefined) return;
-          if (ending.type === 'yuugyoku') {
-            const { tenpai } = ending;
-            const notenCount = 4 - tenpai.length;
-            if (notenCount !== 0 && notenCount !== 4) {
-              const tenpaiRyo = 3000 / notenCount;
-              eswn.forEach((name, idx) => {
-                score[idx] += (tenpai.includes(name) ? 3000 / (4 - notenCount) : -tenpaiRyo);
-              });
-            }
-          } else if (ending.type === 'ron') {
-            const { point } = ending;
-            const playerIdx = eswn.indexOf(ending.player);
-            const targetIdx = eswn.indexOf(ending.target);
-            const isOya = playerIdx === round.kyoku % 4;
-            const movingScore = (() => {
-              if (point.type === 'normal') return fufanToRonScore(game.mode, point.fu, point.fan, isOya);
-              return (isOya ? 48000 : 36000) * point.multiplier;
-            })();
-            score[targetIdx] -= movingScore + round.kyoku * 300;
-            score[playerIdx] += (movingScore + deposit + round.kyoku * 300);
-            deposit = 0;
-          } else {
-            // tsumo
-            const { point } = ending;
-            const playerIdx = eswn.indexOf(ending.player);
-            const isOya = playerIdx === round.kyoku % 4;
-            if (isOya) {
-              const perPlayerScore = (() => {
-                if (point.type === 'normal') return fufanToTsumoScoreOya(game.mode, point.fu, point.fan);
-                return 16000 * point.multiplier;
-              })();
-              score = score.map((e, idx) => {
-                if (idx === playerIdx) return e + perPlayerScore * 3 + deposit + round.kyoku * 300;
-                return e - (perPlayerScore + round.kyoku * 100);
-              });
-              deposit = 0;
-            } else {
-              const perPlayerScore = (() => {
-                if (point.type === 'normal') return fufanToTsumoScoreKodomo(game.mode, point.fu, point.fan);
-                return { oya: 16000 * point.multiplier, kodomo: 8000 * point.multiplier };
-              })();
-              score = score.map((e, idx) => {
-                if (idx === round.kyoku % 4) return e - (perPlayerScore.oya + round.kyoku * 100);
-                if (idx === playerIdx) return e + perPlayerScore.oya + perPlayerScore.kodomo * 2 + deposit + round.kyoku * 300;
-                return e - (perPlayerScore.kodomo + round.kyoku * 100);
-              });
-              deposit = 0;
-            }
-          }
+        const { scoreLog, deposit } = gameToScoreLog(game);
+        const score = [25000, 25000, 25000, 25000].map((e, idx) => {
+          return e + scoreLog.reduce((acc, curr) => acc + curr[idx]!, 0);
         });
         return (
           <VStack key={game.id}>
