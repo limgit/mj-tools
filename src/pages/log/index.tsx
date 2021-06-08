@@ -206,8 +206,8 @@ const Log: React.FC = () => {
               if (point.type === 'normal') return fufanToRonPoint(game.mode, point.fu, point.fan, isOya);
               return (isOya ? 48000 : 36000) * point.multiplier;
             })();
-            score[targetIdx] -= movingPoint;
-            score[playerIdx] += (movingPoint + deposit);
+            score[targetIdx] -= movingPoint + round.kyoku * 300;
+            score[playerIdx] += (movingPoint + deposit + round.kyoku * 300);
             deposit = 0;
           } else {
             // tsumo
@@ -220,8 +220,8 @@ const Log: React.FC = () => {
                 return 16000 * point.multiplier;
               })();
               score = score.map((e, idx) => {
-                if (idx === playerIdx) return e + perPlayerPoint * 3 + deposit;
-                return e - perPlayerPoint;
+                if (idx === playerIdx) return e + perPlayerPoint * 3 + deposit + round.kyoku * 300;
+                return e - (perPlayerPoint + round.kyoku * 100);
               });
               deposit = 0;
             } else {
@@ -230,9 +230,9 @@ const Log: React.FC = () => {
                 return { oya: 16000 * point.multiplier, kodomo: 8000 * point.multiplier };
               })();
               score = score.map((e, idx) => {
-                if (idx === round.kyoku % 4) return e - perPlayerPoint.oya;
-                if (idx === playerIdx) return e + perPlayerPoint.oya + perPlayerPoint.kodomo * 2 + deposit;
-                return e - perPlayerPoint.kodomo;
+                if (idx === round.kyoku % 4) return e - (perPlayerPoint.oya + round.kyoku * 100);
+                if (idx === playerIdx) return e + perPlayerPoint.oya + perPlayerPoint.kodomo * 2 + deposit + round.kyoku * 300;
+                return e - (perPlayerPoint.kodomo + round.kyoku * 100);
               });
               deposit = 0;
             }
