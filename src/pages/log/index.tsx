@@ -59,6 +59,26 @@ const Log: React.FC = () => {
       },
     ]);
   };
+  const setGame = (gameId: number, newV: Game) => setGameList(gameList.map((game) => (game.id !== gameId ? game : newV)));
+  const setRound = (gameId: number, roundIdx: number, newV: Game['rounds'][number]) => {
+    const targetGame = gameList.find((game) => game.id === gameId);
+    if (targetGame === undefined) return;
+    setGame(gameId, {
+      ...targetGame,
+      rounds: targetGame.rounds.map((round, rIdx) => (rIdx !== roundIdx ? round : newV)),
+    });
+  };
+  const toggleRiichi = (gameId: number, roundIdx: number, name: string) => {
+    const targetGame = gameList.find((game) => game.id === gameId);
+    if (targetGame === undefined) return;
+    const targetRound = targetGame.rounds[roundIdx];
+    if (targetRound === undefined) return;
+    const prevRiichi = targetRound.riichi;
+    setRound(gameId, roundIdx, {
+      ...targetRound,
+      riichi: prevRiichi.includes(name) ? prevRiichi.filter((x) => x !== name) : [...prevRiichi, name],
+    });
+  }
 
   return (
     <VStack spacing={8}>
@@ -165,21 +185,7 @@ const Log: React.FC = () => {
                   <GridItem key={name}>
                     <Button
                       colorScheme={isRiiched ? 'telegram' : undefined}
-                      onClick={() => {
-                        setGameList(gameList.map((g) => {
-                          if (g.id !== game.id) return g;
-                          return {
-                            ...g,
-                            rounds: g.rounds.map((round, rIdx) => {
-                              if (rIdx !== g.rounds.length - 1) return round;
-                              return {
-                                ...round,
-                                riichi: isRiiched ? round.riichi.filter((x) => x !== name) : [...round.riichi, name],
-                              };
-                            }),
-                          };
-                        }));
-                      }}
+                      onClick={() => toggleRiichi(game.id, game.rounds.length - 1, name)}
                     >
                       {name} 리치
                     </Button>
