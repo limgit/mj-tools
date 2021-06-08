@@ -238,7 +238,7 @@ const Log: React.FC = () => {
   };
 
   return (
-    <VStack>
+    <VStack spacing={8}>
       {gameList.map((game) => {
         const { eswn } = game;
         const { scoreLog, deposit } = gameToScoreLog(game);
