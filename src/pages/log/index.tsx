@@ -11,6 +11,8 @@ import {
   Heading,
   Text,
   useDisclosure,
+  Grid,
+  GridItem,
 } from '@chakra-ui/react';
 
 import { getItem, setItem } from '@/storage';
@@ -243,6 +245,7 @@ const Log: React.FC = () => {
         const score = [25000, 25000, 25000, 25000].map((e, idx) => {
           return e + scoreLog.reduce((acc, curr) => acc + curr[idx]!, 0);
         });
+        const lastRound = game.rounds[game.rounds.length - 1]!; // Already exists, because at least one kyoku exists
         return (
           <VStack key={game.id}>
             <HStack>
@@ -332,6 +335,39 @@ const Log: React.FC = () => {
                 </HStack>
               )
             })}
+            <Grid templateColumns="repeat(2, 1fr)" gap={2}>
+              {eswn.map((name) => {
+                const isRiiched = lastRound.riichi.includes(name);
+                return (
+                  <GridItem key={name}>
+                    <Button
+                      colorScheme={isRiiched ? 'telegram' : undefined}
+                      onClick={() => {
+                        setGameList(gameList.map((g) => {
+                          if (g.id !== game.id) return g;
+                          return {
+                            ...g,
+                            rounds: g.rounds.map((round, rIdx) => {
+                              if (rIdx !== g.rounds.length - 1) return round;
+                              return {
+                                ...round,
+                                riichi: isRiiched ? round.riichi.filter((x) => x !== name) : [...round.riichi, name],
+                              };
+                            }),
+                          };
+                        }));
+                      }}
+                    >
+                      {name} 리치
+                    </Button>
+                  </GridItem>
+                );
+              })}
+            </Grid>
+            <HStack>
+              <Button>화료</Button>
+              <Button>유국</Button>
+            </HStack>
           </VStack>
         );
       })}
