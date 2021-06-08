@@ -22,7 +22,7 @@ import {
   fufanToTsumoScoreOya,
   gameToScoreLog,
 } from './utils';
-import { GameMode, Game } from './types';
+import { GameMode, Game, Round, RoundEnding } from './types';
 
 import NewGameModal from './NewGameModal';
 import YuugyokuModal from './YuugyokuModal';
@@ -65,7 +65,7 @@ const Log: React.FC = () => {
     ]);
   };
   const setGame = (gameId: number, newV: Game) => setGameList(gameList.map((game) => (game.id !== gameId ? game : newV)));
-  const setRound = (gameId: number, roundIdx: number, newV: Game['rounds'][number]) => {
+  const setRound = (gameId: number, roundIdx: number, newV: Round) => {
     const targetGame = gameList.find((game) => game.id === gameId);
     if (targetGame === undefined) return;
     setGame(gameId, {
@@ -84,7 +84,7 @@ const Log: React.FC = () => {
       riichi: prevRiichi.includes(name) ? prevRiichi.filter((x) => x !== name) : [...prevRiichi, name],
     });
   }
-  const endCurrentRound = (gameId: number, endingV: Extract<Game['rounds'][number]['ending'], object>) => {
+  const endCurrentRound = (gameId: number, endingV: RoundEnding) => {
     const targetGame = gameList.find((game) => game.id === gameId);
     if (targetGame === undefined) return;
     const lastRound = targetGame.rounds[targetGame.rounds.length - 1]!;
