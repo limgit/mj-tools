@@ -25,12 +25,17 @@ import {
 import { GameMode, Game } from './types';
 
 import NewGameModal from './NewGameModal';
+import YuugyokuModal from './YuugyokuModal';
 
 const GAME_LIST_KEY = 'gameList';
 
 const Log: React.FC = () => {
   const { isOpen: modalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
   const [gameList, _setGameList] = React.useState<Game[]>([]);
+  const [yuugyokuModal, setYuugyokuModal] = React.useState<{ open: boolean, game: Game | null }>({
+    open: false,
+    game: null,
+  });
 
   const setGameList = (newV: Game[]) => {
     _setGameList(newV);
@@ -79,6 +84,57 @@ const Log: React.FC = () => {
       riichi: prevRiichi.includes(name) ? prevRiichi.filter((x) => x !== name) : [...prevRiichi, name],
     });
   }
+  const endCurrentRound = (gameId: number, endingV: Extract<Game['rounds'][number]['ending'], object>) => {
+    const targetGame = gameList.find((game) => game.id === gameId);
+    if (targetGame === undefined) return;
+    const lastRound = targetGame.rounds[targetGame.rounds.length - 1]!;
+    const next = (() => {
+      const { kyoku, honba } = lastRound;
+      const oyaPlayer = targetGame.eswn[kyoku % 4]!;
+      // oya's agari / yuugyoku, oya is ten -> kyoku persists, honba increases
+      if ((endingV.type === 'ron' && endingV.player === oyaPlayer)
+        ||(endingV.type ==='tsumo' && endingV.player === oyaPlayer)
+        ||(endingV.type === 'yuugyoku' && endingV.tenpai.includes(oyaPlayer))
+      ) {
+        return { kyoku, honba: honba + 1 };
+      }
+      // yuugyoku, oya is not ten -> kyoku and honba increases
+      if ((endingV.type === 'yuugyoku' && !endingV.tenpai.includes(oyaPlayer))) {
+        return { kyoku: kyoku + 1, honba: honba + 1 };
+      }
+      // All the other ending cases -> kyoku increases, and honba reset to 0
+      return { kyoku: kyoku + 1, honba: 0 };
+    })();
+    setGame(gameId, {
+      ...targetGame,
+      rounds: [
+        ...targetGame.rounds.map((round, rIdx) => {
+          if (rIdx !== targetGame.rounds.length - 1) return round;
+          return {
+            ...round,
+            ending: endingV,
+          };
+        }),
+        {
+          kyoku: next.kyoku,
+          honba: next.honba,
+          riichi: [],
+          ending: undefined,
+        },
+      ]
+    });
+  };
+
+  const onYuugyokuModalClose = () => setYuugyokuModal({ open: false, game: null });
+  const onYuugyokuModalSave = (tenpaiList: string[], note: string) => {
+    const { game } = yuugyokuModal;
+    if (game === null) return;
+    endCurrentRound(game.id, {
+      type: 'yuugyoku',
+      tenpai: tenpaiList,
+      note,
+    });
+  }
 
   return (
     <VStack spacing={8}>
@@ -115,7 +171,7 @@ const Log: React.FC = () => {
             {game.rounds.map((round) => {
               const roundPrefix = {
                 0: '동', 1: '남', 2: '서', 3: '북',
-              }[round.kyoku / 4];
+              }[Math.floor(round.kyoku / 4)];
               const { ending } = round;
               return (
                 <HStack key={`${round.kyoku}-${round.honba}`}>
@@ -126,6 +182,7 @@ const Log: React.FC = () => {
                       {ending.tenpai.length === 0 && '전원 노텐'}
                       {ending.tenpai.length === 4 && '전원 텐'}
                       {ending.tenpai.length !== 0 && ending.tenpai.length !== 4 && `텐파이: ${ending.tenpai.join(', ')}`}
+                      . {ending.note}
                     </Text>
                   )}
                   {ending?.type === 'ron' && (() => {
@@ -195,7 +252,7 @@ const Log: React.FC = () => {
             </Grid>
             <HStack>
               <Button>화료</Button>
-              <Button>유국</Button>
+              <Button onClick={() => setYuugyokuModal({ open: true, game })}>유국</Button>
             </HStack>
           </VStack>
         );
@@ -206,6 +263,12 @@ const Log: React.FC = () => {
         open={modalOpen}
         onClose={onModalClose}
         onAddGame={addGame}
+      />
+      <YuugyokuModal
+        open={yuugyokuModal.open}
+        game={yuugyokuModal.game}
+        onClose={onYuugyokuModalClose}
+        onSave={onYuugyokuModalSave}
       />
     </VStack>
   );
