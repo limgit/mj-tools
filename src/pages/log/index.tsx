@@ -47,6 +47,32 @@ const Log: React.FC = () => {
   });
   const { hasCopied, onCopy } = useClipboard(JSON.stringify(gameList));
 
+  const csv = gameList.map((game) => {
+    const { scoreLog } = gameToScoreLog(game);
+    const score = [25000, 25000, 25000, 25000].map((e, idx) => {
+      return e + scoreLog.reduce((acc, curr) => acc + curr[idx]!, 0);
+    });
+    return [
+      ['', '', ...game.eswn].join(','),
+      ...game.rounds.map((round, rIdx) => {
+        const roundPrefix = {
+          0: '동', 1: '남', 2: '서', 3: '북',
+        }[Math.floor(round.kyoku / 4)]!;
+        const currScoreLog = scoreLog[rIdx]!.map((e) => (e === 0 ? '' : e));
+        return [
+          `${roundPrefix}${(round.kyoku % 4) + 1}국`,
+          round.honba,
+          ...currScoreLog,
+          '', // slot for fan
+          `"${round.riichi.join(', ')}"`,
+          round.ending?.note,
+        ].join(',');
+      }),
+      ['최종', '', ...score].join(','),
+    ].join('\n');
+  }).join('\n');
+  const { hasCopied: csvCopied, onCopy: copyCsv } = useClipboard(csv);
+
   const setGameList = (newV: Game[]) => {
     _setGameList(newV);
     setItem(GAME_LIST_KEY, newV);
@@ -175,6 +201,9 @@ const Log: React.FC = () => {
           }}
         >
           불러오기
+        </Button>
+        <Button onClick={copyCsv}>
+          {csvCopied ? '복사됨!' : 'CSV'}
         </Button>
       </HStack>
       {gameList.map((game) => {
