@@ -66,7 +66,7 @@ type Game = {
   }[],
 };
 
-function fufanToRonPoint(mode: GameMode, fu: number, fan: number, isOya: boolean) {
+function fufanToRonScore(mode: GameMode, fu: number, fan: number, isOya: boolean) {
   if (fan <= 0) return 0;
   if (mode === 'fan') {
     switch (fan) {
@@ -89,8 +89,8 @@ function fufanToRonPoint(mode: GameMode, fu: number, fan: number, isOya: boolean
   // TODO: fufan
   return 0;
 }
-function fufanToTsumoPointOya(mode: GameMode, fu: number, fan: number) {
-  // All points
+function fufanToTsumoScoreOya(mode: GameMode, fu: number, fan: number) {
+  // All Scores
   if (fan <= 0) return 0;
   if (mode === 'fan') {
     switch (fan) {
@@ -113,8 +113,8 @@ function fufanToTsumoPointOya(mode: GameMode, fu: number, fan: number) {
   // TODO: fufan
   return 0;
 }
-function fufanToTsumoPointKodomo(mode: GameMode, fu: number, fan: number) {
-  // All points
+function fufanToTsumoScoreKodomo(mode: GameMode, fu: number, fan: number) {
+  // All Scores
   if (fan <= 0) return { oya: 0, kodomo: 0 };
   if (mode === 'fan') {
     switch (fan) {
@@ -177,7 +177,7 @@ const Log: React.FC = () => {
         const { eswn } = game;
         let score = [25000, 25000, 25000, 25000];
         let deposit = 0;
-        // Calculating points
+        // Calculating scores
         game.rounds.forEach((round) => {
           // Handling riichi
           eswn.forEach((name, idx) => {
@@ -202,12 +202,12 @@ const Log: React.FC = () => {
             const playerIdx = eswn.indexOf(ending.player);
             const targetIdx = eswn.indexOf(ending.target);
             const isOya = playerIdx === round.kyoku % 4;
-            const movingPoint = (() => {
-              if (point.type === 'normal') return fufanToRonPoint(game.mode, point.fu, point.fan, isOya);
+            const movingScore = (() => {
+              if (point.type === 'normal') return fufanToRonScore(game.mode, point.fu, point.fan, isOya);
               return (isOya ? 48000 : 36000) * point.multiplier;
             })();
-            score[targetIdx] -= movingPoint + round.kyoku * 300;
-            score[playerIdx] += (movingPoint + deposit + round.kyoku * 300);
+            score[targetIdx] -= movingScore + round.kyoku * 300;
+            score[playerIdx] += (movingScore + deposit + round.kyoku * 300);
             deposit = 0;
           } else {
             // tsumo
@@ -215,24 +215,24 @@ const Log: React.FC = () => {
             const playerIdx = eswn.indexOf(ending.player);
             const isOya = playerIdx === round.kyoku % 4;
             if (isOya) {
-              const perPlayerPoint = (() => {
-                if (point.type === 'normal') return fufanToTsumoPointOya(game.mode, point.fu, point.fan);
+              const perPlayerScore = (() => {
+                if (point.type === 'normal') return fufanToTsumoScoreOya(game.mode, point.fu, point.fan);
                 return 16000 * point.multiplier;
               })();
               score = score.map((e, idx) => {
-                if (idx === playerIdx) return e + perPlayerPoint * 3 + deposit + round.kyoku * 300;
-                return e - (perPlayerPoint + round.kyoku * 100);
+                if (idx === playerIdx) return e + perPlayerScore * 3 + deposit + round.kyoku * 300;
+                return e - (perPlayerScore + round.kyoku * 100);
               });
               deposit = 0;
             } else {
-              const perPlayerPoint = (() => {
-                if (point.type === 'normal') return fufanToTsumoPointKodomo(game.mode, point.fu, point.fan);
+              const perPlayerScore = (() => {
+                if (point.type === 'normal') return fufanToTsumoScoreKodomo(game.mode, point.fu, point.fan);
                 return { oya: 16000 * point.multiplier, kodomo: 8000 * point.multiplier };
               })();
               score = score.map((e, idx) => {
-                if (idx === round.kyoku % 4) return e - (perPlayerPoint.oya + round.kyoku * 100);
-                if (idx === playerIdx) return e + perPlayerPoint.oya + perPlayerPoint.kodomo * 2 + deposit + round.kyoku * 300;
-                return e - (perPlayerPoint.kodomo + round.kyoku * 100);
+                if (idx === round.kyoku % 4) return e - (perPlayerScore.oya + round.kyoku * 100);
+                if (idx === playerIdx) return e + perPlayerScore.oya + perPlayerScore.kodomo * 2 + deposit + round.kyoku * 300;
+                return e - (perPlayerScore.kodomo + round.kyoku * 100);
               });
               deposit = 0;
             }
