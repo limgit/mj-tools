@@ -22,12 +22,14 @@ type NewGameModalProps = {
 const NewGameModal: React.FC<NewGameModalProps> = ({
   open, onClose, onAddGame,
 }) => {
-  const [modalInputs, setModalInputs] = React.useState(['', '', '', '']);
+  const DEFAULT = ['', '', '', ''];
+  const [modalInputs, setModalInputs] = React.useState(DEFAULT);
   const setModalInputsIdx = (newV: string, idx: number) => {
     setModalInputs(modalInputs.map((e, i) => (i === idx ? newV : e)));
   };
   const onCreate = (mode: 'fufan' | 'fan') => {
     onAddGame(mode, modalInputs as [string, string, string, string]);
+    setModalInputs(DEFAULT);
     onClose();
   };
   return (
