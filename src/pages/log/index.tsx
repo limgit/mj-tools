@@ -97,7 +97,7 @@ const Log: React.FC = () => {
       const { kyoku, honba } = lastRound;
       const oyaPlayer = targetGame.eswn[kyoku % 4]!;
       // oya's agari / yuugyoku, oya is ten -> kyoku persists, honba increases
-      if ((endingV.type === 'ron' && endingV.player === oyaPlayer)
+      if ((endingV.type === 'ron' && endingV.payees.filter((e) => e.name === oyaPlayer).length === 1)
         ||(endingV.type ==='tsumo' && endingV.player === oyaPlayer)
         ||(endingV.type === 'yuugyoku' && endingV.tenpai.includes(oyaPlayer))
       ) {
@@ -197,23 +197,26 @@ const Log: React.FC = () => {
                     </Text>
                   )}
                   {ending?.type === 'ron' && (() => {
-                    const { target, player, point, note } = ending;
-                    const isOya = eswn.indexOf(player) === round.kyoku % 4;
-                    const pointTxt = (() => {
-                      if (point.type === 'yakuman') {
-                        if (point.multiplier === 1) return '역만';
-                        return `${point.multiplier}배 역만`;
-                      }
-                      if (game.mode === 'fan') return `${point.fan}판`;
-                      return `${point.fu}부 ${point.fan}판`;
-                    })();
-                    const ronScore = (() => {
-                      if (point.type === 'yakuman') return (isOya ? 48000 : 36000) * point.multiplier + round.honba * 300;
-                      return fufanToRonScore(game.mode, point.fu, point.fan, isOya) + round.honba * 300;
-                    })();
+                    const { payees, payer, note } = ending;
+                    const infoText = payees.map((p) => {
+                      const isOya = eswn.indexOf(p.name) === round.kyoku % 4;
+                      const pointTxt = (() => {
+                        if (p.point.type === 'yakuman') {
+                          if (p.point.multiplier === 1) return '역만';
+                          return `${p.point.multiplier}배 역만`;
+                        }
+                        if (game.mode === 'fan') return `${p.point.fan}판`;
+                        return `${p.point.fu}부 ${p.point.fan}판`;
+                      })();
+                      const ronScore = (() => {
+                        if (p.point.type === 'yakuman') return (isOya ? 48000 : 36000) * p.point.multiplier + round.honba * 300;
+                        return fufanToRonScore(game.mode, p.point.fu, p.point.fan, isOya) + round.honba * 300;
+                      })();
+                      return `${p.name} (${pointTxt}, ${ronScore})`;
+                    }).join(', ');
                     return (
                       <Text>
-                        론: {target} → {player} ({pointTxt}, {ronScore}) {note}
+                        론: {infoText}, 방총: {payer} {note}
                       </Text>
                     );
                   })()}

@@ -13,9 +13,11 @@ export type RoundEnding = {
   note: string,
 } | {
   type: 'ron',
-  player: string,
-  target: string,
-  point: AgariPoint,
+  payer: string,
+  payees: {
+    name: string,
+    point: AgariPoint,
+  }[],
   note: string,
 } | {
   type: 'tsumo',

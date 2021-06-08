@@ -96,16 +96,24 @@ export function gameToScoreLog(game: Game) {
         });
       }
     } else if (ending?.type === 'ron') {
-      const { point } = ending;
-      const playerIdx = eswn.indexOf(ending.player);
-      const targetIdx = eswn.indexOf(ending.target);
-      const isOya = playerIdx === round.kyoku % 4;
-      const movingScore = (() => {
-        if (point.type === 'normal') return fufanToRonScore(game.mode, point.fu, point.fan, isOya);
-        return (isOya ? 48000 : 36000) * point.multiplier;
+      const { payees, payer } = ending;
+      const payerIdx = eswn.indexOf(payer);
+      const depositPayeeIdx = (() => {
+        const payeeIdxs = payees.map((e) => eswn.indexOf(e.name));
+        const afterPayer = payeeIdxs.filter((e) => e > payerIdx);
+        if (afterPayer.length === 0) return Math.min(...payeeIdxs);
+        return Math.min(...afterPayer);
       })();
-      thisRoundLog[targetIdx] -= movingScore + round.honba * 300;
-      thisRoundLog[playerIdx] += (movingScore + deposit + round.honba * 300);
+      payees.forEach((p) => {
+        const payeeIdx = eswn.indexOf(p.name);
+        const isOya = payeeIdx === round.kyoku % 4;
+        const movingScore = (() => {
+          if (p.point.type === 'normal') return fufanToRonScore(game.mode, p.point.fu, p.point.fan, isOya);
+          return (isOya ? 48000 : 36000) * p.point.multiplier;
+        })();
+        thisRoundLog[payerIdx] -= (movingScore + round.honba * 300);
+        thisRoundLog[payeeIdx] += (movingScore + round.honba * 300 + (payeeIdx === depositPayeeIdx ? deposit : 0));
+      });
       deposit = 0;
     } else if (ending?.type === 'tsumo') {
       // tsumo
