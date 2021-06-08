@@ -11,6 +11,7 @@ import {
   Button,
   Heading,
   Text,
+  useClipboard,
   useDisclosure,
   Grid,
   GridItem,
@@ -44,6 +45,7 @@ const Log: React.FC = () => {
     open: false,
     game: null,
   });
+  const { hasCopied, onCopy } = useClipboard(JSON.stringify(gameList));
 
   const setGameList = (newV: Game[]) => {
     _setGameList(newV);
@@ -160,6 +162,21 @@ const Log: React.FC = () => {
 
   return (
     <VStack spacing={8} mb={8}>
+      <HStack>
+        <Button onClick={onCopy}>
+          {hasCopied ? '복사됨!' : '내보내기'}
+        </Button>
+        <Button
+          onClick={() => {
+            const data = prompt('불러오기');
+            if (data !== null) {
+              setGameList(JSON.parse(data));
+            }
+          }}
+        >
+          불러오기
+        </Button>
+      </HStack>
       {gameList.map((game) => {
         const { eswn } = game;
         const { scoreLog, deposit } = gameToScoreLog(game);
