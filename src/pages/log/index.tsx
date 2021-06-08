@@ -8,19 +8,14 @@ import {
   VStack,
   HStack,
   Button,
-  Input,
   Heading,
   Text,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
   useDisclosure,
 } from '@chakra-ui/react';
 
 import { getItem, setItem } from '@/storage';
+
+import NewGameModal from './NewGameModal';
 
 const GAME_LIST_KEY = 'gameList';
 
@@ -210,15 +205,11 @@ function gameToScoreLog(game: Game) {
 
 const Log: React.FC = () => {
   const { isOpen: modalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
-  const [modalInputs, setModalInputs] = React.useState(['', '', '', '']);
   const [gameList, _setGameList] = React.useState<Game[]>([]);
 
   const setGameList = (newV: Game[]) => {
     _setGameList(newV);
     setItem(GAME_LIST_KEY, newV);
-  };
-  const setModalInputsIdx = (newV: string, idx: number) => {
-    setModalInputs(modalInputs.map((e, i) => (i === idx ? newV : e)));
   };
 
   React.useEffect(() => {
@@ -227,13 +218,13 @@ const Log: React.FC = () => {
     _setGameList(gList ?? []);
   }, []);
 
-  const onAddGame = (mode: GameMode) => {
+  const addGame = (mode: GameMode, eswn: [string, string, string, string]) => {
     setGameList([
       ...gameList,
       {
         id: gameList.length === 0 ? 1 : gameList[gameList.length - 1]!.id + 1,
         mode,
-        eswn: [modalInputs[0]!, modalInputs[1]!, modalInputs[2]!, modalInputs[3]!],
+        eswn,
         rounds: [{
           kyoku: 0,
           honba: 0,
@@ -242,8 +233,6 @@ const Log: React.FC = () => {
         }],
       },
     ]);
-    setModalInputs(['', '', '', '']);
-    onModalClose();
   };
 
   return (
@@ -348,39 +337,11 @@ const Log: React.FC = () => {
       })}
       <Button onClick={onModalOpen}>게임 추가</Button>
 
-      <Modal isOpen={modalOpen} onClose={onModalClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>새 게임 생성</ModalHeader>
-          <ModalBody>
-            <VStack>
-              <HStack>
-                <Text>동:</Text>
-                <Input value={modalInputs[0]} onChange={(e) => setModalInputsIdx(e.target.value, 0)} />
-              </HStack>
-              <HStack>
-                <Text>남:</Text>
-                <Input value={modalInputs[1]} onChange={(e) => setModalInputsIdx(e.target.value, 1)} />
-              </HStack>
-              <HStack>
-                <Text>서:</Text>
-                <Input value={modalInputs[2]} onChange={(e) => setModalInputsIdx(e.target.value, 2)} />
-              </HStack>
-              <HStack>
-                <Text>북:</Text>
-                <Input value={modalInputs[3]} onChange={(e) => setModalInputsIdx(e.target.value, 3)} />
-              </HStack>
-            </VStack>
-          </ModalBody>
-          <ModalFooter>
-            <HStack>
-              <Button onClick={() => onAddGame('fan')}>생성(판)</Button>
-              <Button disabled onClick={() => onAddGame('fufan')}>생성(부판)</Button>
-              <Button onClick={onModalClose}>닫기</Button>
-            </HStack>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <NewGameModal
+        open={modalOpen}
+        onClose={onModalClose}
+        onAddGame={addGame}
+      />
     </VStack>
   );
 };
