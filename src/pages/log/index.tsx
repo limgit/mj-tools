@@ -234,7 +234,12 @@ const Log: React.FC = () => {
         id: gameList.length === 0 ? 1 : gameList[gameList.length - 1]!.id + 1,
         mode,
         eswn: [modalInputs[0]!, modalInputs[1]!, modalInputs[2]!, modalInputs[3]!],
-        rounds: [],
+        rounds: [{
+          kyoku: 0,
+          honba: 0,
+          riichi: [],
+          ending: undefined,
+        }],
       },
     ]);
     setModalInputs(['', '', '', '']);
@@ -272,7 +277,72 @@ const Log: React.FC = () => {
               <Text>공탁금</Text>
               <Text>{deposit}</Text>
             </HStack>
-            {/* TODO: Round display + Round editor */}
+            {game.rounds.map((round) => {
+              const roundPrefix = {
+                0: '동', 1: '남', 2: '서', 3: '북',
+              }[round.kyoku / 4];
+              const { ending } = round;
+              return (
+                <HStack key={`${round.kyoku}-${round.honba}`}>
+                  <Text fontWeight="bold">{`${roundPrefix} ${round.kyoku % 4 + 1}국 ${round.honba}본장`}</Text>
+                  {ending === undefined && (<Text>진행 중</Text>)}
+                  {ending?.type === 'yuugyoku' && (
+                    <Text>
+                      {ending.tenpai.length === 0 && '전원 노텐'}
+                      {ending.tenpai.length === 4 && '전원 텐'}
+                      {ending.tenpai.length !== 0 && ending.tenpai.length !== 4 && `텐파이: ${ending.tenpai.join(', ')}`}
+                    </Text>
+                  )}
+                  {ending?.type === 'ron' && (() => {
+                    const { target, player, point, note } = ending;
+                    const isOya = eswn.indexOf(player) === round.kyoku % 4;
+                    const pointTxt = (() => {
+                      if (point.type === 'yakuman') {
+                        if (point.multiplier === 1) return '역만';
+                        return `${point.multiplier}배 역만`;
+                      }
+                      if (game.mode === 'fan') return `${point.fan}판`;
+                      return `${point.fu}부 ${point.fan}판`;
+                    })();
+                    const ronScore = (() => {
+                      if (point.type === 'yakuman') return (isOya ? 48000 : 36000) * point.multiplier;
+                      return fufanToRonScore(game.mode, point.fu, point.fan, isOya);
+                    })();
+                    return (
+                      <Text>
+                        론: {target} → {player} ({pointTxt}, {ronScore}) {note}
+                      </Text>
+                    );
+                  })()}
+                  {ending?.type === 'tsumo' && (() => {
+                    const { player, point, note } = ending;
+                    const isOya = eswn.indexOf(player) === round.kyoku % 4;
+                    const pointTxt = (() => {
+                      if (point.type === 'yakuman') {
+                        if (point.multiplier === 1) return '역만';
+                        return `${point.multiplier}배 역만`;
+                      }
+                      if (game.mode === 'fan') return `${point.fan}판`;
+                      return `${point.fu}부 ${point.fan}판`;
+                    })();
+                    const tsumoScore = (() => {
+                      if (isOya) {
+                        if (point.type === 'yakuman') return `${16000 * point.multiplier}∀`;
+                        return `${fufanToTsumoScoreOya(game.mode, point.fu, point.fan)}∀`;
+                      }
+                      if (point.type === 'yakuman') return `${8000 * point.multiplier}-${16000 * point.multiplier}`;
+                      const { oya, kodomo } = fufanToTsumoScoreKodomo(game.mode, point.fu, point.fan);
+                      return `${kodomo}-${oya}`;
+                    })();
+                    return (
+                      <Text>
+                        쯔모: {player} ({pointTxt}, {tsumoScore}) {note}
+                      </Text>
+                    )
+                  })()}
+                </HStack>
+              )
+            })}
           </VStack>
         );
       })}
