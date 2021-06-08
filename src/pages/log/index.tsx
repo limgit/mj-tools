@@ -284,6 +284,29 @@ const Log: React.FC = () => {
                 </HStack>
               </>
             )}
+            {game.rounds.length > 1 && (
+              <Button
+                onClick={() => {
+                  if (lastRound.ending !== undefined) {
+                    // Finished game. Re-end last round with same ending.
+                    // endCurrentRound will append new ongoing round
+                    endCurrentRound(game.id, lastRound.ending);
+                  } else {
+                    // Unfinished game. Remove current ongoing round and make previous one as ongoing
+                    // This will not be triggered in very first round due to button rendering condition
+                    setGame(game.id, {
+                      ...game,
+                      rounds: game.rounds.slice(0, -1).map((r, rIdx) => (rIdx === game.rounds.length - 2 ? {
+                        ...r,
+                        ending: undefined,
+                      } : r)),
+                    });
+                  }
+                }}
+              >
+                실행 취소
+              </Button>
+            )}
           </VStack>
         );
       })}
