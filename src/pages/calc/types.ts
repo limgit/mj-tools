@@ -2,6 +2,7 @@ export type ShuuIro = 'm' | 's' | 'p';
 export type JiIro = 'z';
 export type Iro = ShuuIro | JiIro;
 export type Machi = 'ryanmen' | 'shanpon' | 'kanchan' | 'penchan' | 'tanki';
+export type AgariType = 'tsumo' | 'ron';
 
 export type Tile = {
   i: Iro,

@@ -1,4 +1,5 @@
 import {
+  AgariType,
   Iro, Tile,
 } from './types';
 import {
@@ -40,7 +41,7 @@ type ParseResult = {
   hand: Tile[],
   nakiTiles: NakiTile[],
   agariTile: Tile,
-  agariType: 'tsumo' | 'ron',
+  agariType: AgariType,
   roundWind: number | null,
   selfWind: number | null,
   dora: Tile[] | null,
@@ -111,7 +112,7 @@ type CalculationResult = {
   isMenzen: boolean,
 };
 export function calcScore(
-  hand: Tile[], nakiTiles: NakiTile[], agariTile: Tile, agariType: 'tsumo' | 'ron',
+  hand: Tile[], nakiTiles: NakiTile[], agariTile: Tile, agariType: AgariType,
 ): CalculationResult {
   console.log(agariType);
   if (hand.length + 1 + nakiTiles.length * 3 !== 14) {
