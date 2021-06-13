@@ -12,6 +12,7 @@ const Home: React.FC = () => {
     <VStack>
       <Heading size="md">Mahjong Tools</Heading>
       <CUILink as={Link} to={RoutePath.log}>Game Logging</CUILink>
+      <CUILink as={Link} to={RoutePath.calc}>Score Calculation</CUILink>
     </VStack>
   );
 };

@@ -6,6 +6,7 @@ import {
 
 import IndexPage from '@/pages';
 import LogPage from '@/pages/log';
+import CalcPage from '@/pages/calc';
 
 import { RoutePath } from './routes';
 
@@ -14,6 +15,7 @@ const Main: React.FC = () => {
     <Switch>
       <Route exact path={RoutePath.home} component={IndexPage} />
       <Route path={RoutePath.log} component={LogPage} />
+      <Route path={RoutePath.calc} component={CalcPage} />
     </Switch>
   );
 };
