@@ -87,6 +87,13 @@ const Calc: React.FC = () => {
                   <Heading size="lg">{score.multiplier === 1 ? '역만' : `${score.multiplier}배 역만`}</Heading>
                 </>
               )}
+              {score.type === 'normal' && (
+                <>
+                  <Heading size="md">역</Heading>
+                  {score.list.map((y) => <Text>{y}</Text>)}
+                  <Heading size="lg">{score.fu}부 {score.fan}판</Heading>
+                </>
+              )}
             </VStack>
           );
         })() : (

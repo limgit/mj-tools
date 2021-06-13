@@ -124,7 +124,7 @@ export function calcScore(
   let counter = 0;
   const yakuList: string[] = [];
 
-  // Check yakuman first
+  // Check yaku's that doesn't need to find atama/mentsu
   const kokushi = checkKokushi(purifyAka(fullHandTiles), purifyAka(agariTile));
   if (kokushi !== undefined) {
     isYakuman = true;
