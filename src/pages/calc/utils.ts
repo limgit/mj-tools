@@ -80,6 +80,22 @@ export function parseInput(input: string): ParseResult {
   };
 }
 
+function purifyAka(tile: Tile): Tile;
+function purifyAka(tiles: Tile[]): Tile[];
+function purifyAka(t: any): any {
+  const helper = (tile: Tile) => {
+    if (tile.i === 'z') return tile;
+    return {
+      i: tile.i,
+      n: tile.n === 0 ? 5 : tile.n,
+    };
+  };
+  if (Array.isArray(t)) {
+    return t.map((tile) => helper(tile));
+  }
+  return helper(t);
+}
+
 type CalculationResult = {
   type: 'error',
   msg: string,
@@ -109,13 +125,13 @@ export function calcScore(
   const yakuList: string[] = [];
 
   // Check yakuman first
-  const kokushi = checkKokushi(fullHandTiles, agariTile);
+  const kokushi = checkKokushi(purifyAka(fullHandTiles), purifyAka(agariTile));
   if (kokushi !== undefined) {
     isYakuman = true;
     counter += kokushi.counter;
     yakuList.push(kokushi.name);
   }
-  const chuuren = checkChuuren(fullHandTiles, agariTile, isMenzen);
+  const chuuren = checkChuuren(purifyAka(fullHandTiles), purifyAka(agariTile), isMenzen);
   if (chuuren !== undefined) {
     isYakuman = true;
     counter += chuuren.counter;
