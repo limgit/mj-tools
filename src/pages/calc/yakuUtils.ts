@@ -72,32 +72,26 @@ export function checkChuuren(
 }
 
 export function checkRyuuisou(
-  atama: Atama, mentsuList: Mentsu[],
+  totalTileList: Tile[],
 ): Yaku | undefined {
-  // is atama green?
-  if (!(atama.i === 's' || (atama.i === 'z' && atama.n === 6))) return undefined;
-  // is mentsu all green?
-  if (!mentsuList.every((m) => m.i === 's' || (m.i === 'z' && m.n === 6))) return undefined;
+  // is all tiles green?
+  if (!totalTileList.every((t) => t.i === 's' || (t.i === 'z' && t.n === 6))) return undefined;
   return { name: '녹일색', counter: 1 };
 }
 
 export function checkTsuisou(
-  atama: Atama, mentsuList: Mentsu[],
+  totalTileList: Tile[],
 ): Yaku | undefined {
-  // is atama jihai?
-  if (atama.i !== 'z') return undefined;
-  // is mentsu all jihal?
-  if (!mentsuList.every((m) => m.i === 'z')) return undefined;
+  // is all tiles jihai?
+  if (!totalTileList.every((t) => t.i === 'z')) return undefined;
   return { name: '자일색', counter: 1 };
 }
 
 export function checkChinroutou(
-  atama: Atama, mentsuList: Mentsu[],
+  totalTileList: Tile[],
 ): Yaku | undefined {
-  // is atama 1 or 9?
-  if (!(atama.n === 1 || atama.n === 9)) return undefined;
-  // is mentsu all 1 or 9?
-  if (!mentsuList.every((m) => (m.type !== 'shun' && (m.n === 1 || m.n === 9)))) return undefined;
+  // is all tiles 1 or 9?
+  if (!totalTileList.every((t) => t.i !== 'z' && (t.n === 1 || t.n === 9))) return undefined;
   return { name: '청노두', counter: 1 };
 }
 

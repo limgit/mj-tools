@@ -3,8 +3,11 @@ import {
   Iro, Tile,
 } from './types';
 import {
+  checkChinroutou,
   checkChuuren,
   checkKokushi,
+  checkRyuuisou,
+  checkTsuisou,
 } from './yakuUtils';
 
 function strToTile(str: string): Tile[] {
@@ -125,7 +128,7 @@ export function calcScore(
   let counter = 0;
   const yakuList: string[] = [];
 
-  // Check yaku's that doesn't need to find atama/mentsu
+  // Check yakus that doesn't need to find atama/mentsu
   const kokushi = checkKokushi(purifyAka(fullHandTiles), purifyAka(agariTile));
   if (kokushi !== undefined) {
     isYakuman = true;
@@ -137,6 +140,24 @@ export function calcScore(
     isYakuman = true;
     counter += chuuren.counter;
     yakuList.push(chuuren.name);
+  }
+  const ryuuisou = checkRyuuisou(purifyAka([...fullHandTiles, agariTile]));
+  if (ryuuisou !== undefined) {
+    isYakuman = true;
+    counter += ryuuisou.counter;
+    yakuList.push(ryuuisou.name);
+  }
+  const tsuisou = checkTsuisou(purifyAka([...fullHandTiles, agariTile]));
+  if (tsuisou !== undefined) {
+    isYakuman = true;
+    counter += tsuisou.counter;
+    yakuList.push(tsuisou.name);
+  }
+  const chinroutou = checkChinroutou(purifyAka([...fullHandTiles, agariTile]));
+  if (chinroutou !== undefined) {
+    isYakuman = true;
+    counter += chinroutou.counter;
+    yakuList.push(chinroutou.name);
   }
 
   if (isYakuman) {
