@@ -11,6 +11,12 @@ function toStrList(handList: Tile[]) {
 function isShuntsu(mentsu: Mentsu): mentsu is Shuntsu {
   return mentsu.type === 'shun';
 }
+export const windToStr = (wind: number) => {
+  if (wind === 1) return '동';
+  if (wind === 2) return '남';
+  if (wind === 3) return '서';
+  return '북';
+};
 
 type Yaku = {
   name: string,
@@ -257,12 +263,6 @@ export function checkIipeko(
 export function checkYakuhai(
   mentsuList: Mentsu[], roundWind: number, selfWind: number,
 ): Yaku[] | undefined {
-  const windToStr = (wind: number) => {
-    if (wind === 1) return '동';
-    if (wind === 2) return '남';
-    if (wind === 3) return '서';
-    return '북';
-  };
   const ret = [
     mentsuList.some((m) => m.i === 'z' && m.n === roundWind) ? `장풍: ${windToStr(roundWind)}` : '',
     mentsuList.some((m) => m.i === 'z' && m.n === selfWind) ? `자풍: ${windToStr(selfWind)}` : '',

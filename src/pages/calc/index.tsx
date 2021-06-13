@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { parseInput, calcScore } from './utils';
 import { Tile } from './types';
+import { windToStr } from './yakuUtils';
 
 const TileImg: React.FC<{ tile: Tile | null, }> = ({ tile }) => {
   const s = tile === null ? 'back' : `${tile.n}${tile.i}`;
@@ -59,6 +60,10 @@ const Calc: React.FC = () => {
           return (
             <VStack mt={8}>
               <Heading size="md">결과</Heading>
+              <HStack>
+                <Text>장풍: {windToStr(result.roundWind)}</Text>
+                <Text>자풍: {windToStr(result.selfWind)}</Text>
+              </HStack>
               <HStack>
                 <VStack>
                   <Text>손패</Text>
