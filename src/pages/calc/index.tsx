@@ -53,7 +53,9 @@ const Calc: React.FC = () => {
       <Button onClick={onClickCalc}>계산하기</Button>
       {result !== undefined && (
         result.ok ? (() => {
-          const score = calcScore(result.hand, result.nakiTiles, result.agariTile, result.agariType);
+          const score = calcScore(
+            result.hand, result.nakiTiles, result.agariTile, result.agariType, result.roundWind, result.selfWind,
+          );
           return (
             <VStack mt={8}>
               <Heading size="md">결과</Heading>
@@ -75,7 +77,7 @@ const Calc: React.FC = () => {
                   </VStack>
                 ))}
               </HStack>
-              <Text>오름패 {result.agariType === 'tsumo' ? '쯔모' : '론'}</Text>
+              <Text>{result.agariType === 'tsumo' ? '쯔모' : '론'}</Text>
               <TileImg tile={result.agariTile} />
               <Box h={8} />
               {score.type === 'error' && (
@@ -84,14 +86,14 @@ const Calc: React.FC = () => {
               {score.type === 'yakuman' && (
                 <>
                   <Heading size="md">역</Heading>
-                  {score.list.map((y) => <Text>{y}</Text>)}
+                  {score.list.map((y) => <Text key={Math.random()}>{y}</Text>)}
                   <Heading size="lg">{score.multiplier === 1 ? '역만' : `${score.multiplier}배 역만`}</Heading>
                 </>
               )}
               {score.type === 'normal' && (
                 <>
                   <Heading size="md">역</Heading>
-                  {score.list.map((y) => <Text>{y}</Text>)}
+                  {score.list.map((y) => <Text key={Math.random()}>{y}</Text>)}
                   <Heading size="lg">{score.fu}부 {score.fan}판</Heading>
                 </>
               )}

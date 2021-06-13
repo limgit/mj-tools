@@ -1,5 +1,5 @@
 import {
-  Tile, Atama, Mentsu, Machi,
+  Tile, Atama, Mentsu, Machi, AgariType, Shuntsu,
 } from './types';
 
 function toStr(tile: Tile) {
@@ -7,6 +7,9 @@ function toStr(tile: Tile) {
 }
 function toStrList(handList: Tile[]) {
   return handList.map(toStr);
+}
+function isShuntsu(mentsu: Mentsu): mentsu is Shuntsu {
+  return mentsu.type === 'shun';
 }
 
 type Yaku = {
@@ -129,3 +132,156 @@ export function checkSuukantsu(
 // ------
 // NORMAL
 // ------
+/* 2 fan */
+// double riichi -> flag
+export function checkChiitoi(
+  atama: Atama[],
+): Yaku | undefined {
+  let r = true;
+  if (atama.length !== 7) return undefined;
+  for (let i = 0; i < atama.length - 1; i += 1) {
+    const atama1 = atama[i]!;
+    for (let j = 0; j < atama.length; j += 1) {
+      const atama2 = atama[j]!;
+      if (atama1.i === atama2.i && atama1.n === atama2.n) r = false;
+    }
+  }
+  if (!r) return undefined;
+  return { name: '치또이츠', counter: 2 };
+}
+
+export function checkSanshoku(
+  mentsuList: Mentsu[], isMenzen: boolean,
+): Yaku | undefined {
+  const shuntsuOnly = mentsuList.filter(isShuntsu);
+  if (shuntsuOnly.length < 3) return undefined;
+  const isSanshoku = (s1: Shuntsu, s2: Shuntsu, s3: Shuntsu) => {
+    return (
+      s1.i !== s2.i && s2.i !== s3.i && s3.i !== s1.i
+      && s1.startN === s2.startN && s2.startN === s3.startN && s3.startN === s1.startN
+    );
+  };
+  if (shuntsuOnly.length === 3) {
+    const s1 = shuntsuOnly[0]!;
+    const s2 = shuntsuOnly[1]!;
+    const s3 = shuntsuOnly[2]!;
+    if (!isSanshoku(s1, s2, s3)) return undefined;
+  }
+  if (shuntsuOnly.length === 4) {
+    const s1 = shuntsuOnly[0]!;
+    const s2 = shuntsuOnly[1]!;
+    const s3 = shuntsuOnly[2]!;
+    const s4 = shuntsuOnly[3]!;
+    if (!isSanshoku(s1, s2, s3) && !isSanshoku(s1, s2, s4) && !isSanshoku(s1, s3, s4) && !isSanshoku(s2, s3, s4)) {
+      return undefined;
+    }
+  }
+  return { name: '삼색동순', counter: isMenzen ? 2 : 1 };
+}
+
+export function checkIttsu(
+  mentsuList: Mentsu[], isMenzen: boolean,
+): Yaku | undefined {
+  const shuntsuOnly = mentsuList.filter(isShuntsu);
+  if (shuntsuOnly.length < 3) return undefined;
+  const isIttsu = (s1: Shuntsu, s2: Shuntsu, s3: Shuntsu) => {
+    const starts = [s1.startN, s2.startN, s3.startN].sort();
+    return (
+      s1.i === s2.i && s2.i === s3.i
+      && starts[0] === 1 && starts[1] === 4 && starts[2] === 7
+    );
+  };
+  if (shuntsuOnly.length === 3) {
+    const s1 = shuntsuOnly[0]!;
+    const s2 = shuntsuOnly[1]!;
+    const s3 = shuntsuOnly[2]!;
+    if (!isIttsu(s1, s2, s3)) return undefined;
+  }
+  if (shuntsuOnly.length === 4) {
+    const s1 = shuntsuOnly[0]!;
+    const s2 = shuntsuOnly[1]!;
+    const s3 = shuntsuOnly[2]!;
+    const s4 = shuntsuOnly[3]!;
+    if (!isIttsu(s1, s2, s3) && !isIttsu(s1, s2, s4) && !isIttsu(s1, s3, s4) && !isIttsu(s2, s3, s4)) {
+      return undefined;
+    }
+  }
+  return { name: '일기통관', counter: isMenzen ? 2 : 1 };
+}
+
+/* 1 fan */
+export function checkMenzenTsumo(
+  isMenzen: boolean, agariType: AgariType,
+): Yaku | undefined {
+  if (isMenzen && agariType === 'tsumo') return { name: '멘젠쯔모', counter: 1 };
+  return undefined;
+}
+
+// riichi -> flag
+// ippatsu -> flag
+
+export function checkFinfuu(
+  atama: Atama, mentsuList: Mentsu[], machi: Machi, isMenzen: boolean, roundWind: number, selfWind: number,
+): Yaku | undefined {
+  // Menzen
+  if (!isMenzen) return undefined;
+  // Atama -> Not yakuhai
+  if (atama.i === 'z' && atama.n === roundWind) return undefined;
+  if (atama.i === 'z' && atama.n === selfWind) return undefined;
+  if (atama.i === 'z' && [5, 6, 7].includes(atama.n)) return undefined;
+  // Mentsu -> all shuntsu
+  if (!mentsuList.every((m) => m.type === 'shun')) return undefined;
+  // Ryanmen machi
+  if (machi !== 'ryanmen') return undefined;
+  return { name: '핑후', counter: 1 };
+}
+
+export function checkIipeko(
+  mentsuList: Mentsu[], isMenzen: boolean,
+): Yaku | undefined {
+  if (!isMenzen) return undefined;
+  // TODO: Check ryanpeko
+  let r = false;
+  for (let i = 0; i < mentsuList.length - 1; i += 1) {
+    const mentsu1 = mentsuList[i]!;
+    for (let j = i + 1; j < mentsuList.length; j += 1) {
+      const mentsu2 = mentsuList[j]!;
+      if (mentsu1.type === 'shun' && mentsu2.type === 'shun'
+        && mentsu1.startN === mentsu2.startN) r = true;
+    }
+  }
+  if (!r) return undefined;
+  return { name: '이페코', counter: 1 };
+}
+
+export function checkYakuhai(
+  mentsuList: Mentsu[], roundWind: number, selfWind: number,
+): Yaku[] | undefined {
+  const windToStr = (wind: number) => {
+    if (wind === 1) return '동';
+    if (wind === 2) return '남';
+    if (wind === 3) return '서';
+    return '북';
+  };
+  const ret = [
+    mentsuList.some((m) => m.i === 'z' && m.n === roundWind) ? `장풍: ${windToStr(roundWind)}` : '',
+    mentsuList.some((m) => m.i === 'z' && m.n === selfWind) ? `자풍: ${windToStr(selfWind)}` : '',
+    mentsuList.some((m) => m.i === 'z' && m.n === 5) ? '역패: 백' : '',
+    mentsuList.some((m) => m.i === 'z' && m.n === 6) ? '역패: 발' : '',
+    mentsuList.some((m) => m.i === 'z' && m.n === 7) ? '역패: 중' : '',
+  ].filter((x) => x !== '');
+  if (ret.length === 0) return undefined;
+  return ret.map((x) => ({ name: x, counter: 1 }));
+}
+
+export function checkTanyao(
+  totalTileList: Tile[],
+): Yaku | undefined {
+  if (!totalTileList.every((t) => t.i !== 'z' && t.n >= 2 && t.n <= 8)) return undefined;
+  return { name: '탕야오', counter: 1 };
+}
+
+// rinshan -> flag
+// chankan -> flag
+// haiteitsumo -> flag
+// haiteiron -> flag
