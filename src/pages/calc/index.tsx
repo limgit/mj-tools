@@ -77,6 +77,7 @@ const Calc: React.FC = () => {
               </HStack>
               <Text>오름패 {result.agariType === 'tsumo' ? '쯔모' : '론'}</Text>
               <TileImg tile={result.agariTile} />
+              <Box h={8} />
               {score.type === 'error' && (
                 <Text>{score.msg}</Text>
               )}
