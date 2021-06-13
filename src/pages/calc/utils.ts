@@ -42,8 +42,8 @@ type ParseResult = {
   nakiTiles: NakiTile[],
   agariTile: Tile,
   agariType: AgariType,
-  roundWind: number | null,
-  selfWind: number | null,
+  roundWind: number,
+  selfWind: number,
   dora: Tile[] | null,
 };
 export function parseInput(input: string): ParseResult {
@@ -75,8 +75,8 @@ export function parseInput(input: string): ParseResult {
     nakiTiles,
     agariTile,
     agariType: agariType === 'a' ? 'tsumo' : 'ron',
-    roundWind: roundWind === undefined ? null : Number(roundWind),
-    selfWind: selfWind === undefined ? null : Number(selfWind),
+    roundWind: roundWind === undefined ? 1 : Number(roundWind),
+    selfWind: selfWind === undefined ? 1 : Number(selfWind),
     dora: dora === undefined ? null : strToTile(dora),
   };
 }
