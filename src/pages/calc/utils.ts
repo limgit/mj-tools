@@ -484,6 +484,8 @@ export function calcScore(
     } as CalculationResult;
   }).sort((a, b) => cmp(a, b));
 
+  // TODO: Handle chiitoi case
+
   const maximum = candidates[0];
   if (maximum === undefined) {
     if (yakumanForm) {
